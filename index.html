@@ -1,1 +1,667 @@
 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POSApp - レジアプリ</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* 共通カード */
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+    }
+
+    /* ログイン画面 */
+    #login-screen {
+      text-align: center;
+      padding: 40px 20px;
+      margin-top: 60px;
+    }
+
+    #login-screen h1 {
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+      color: var(--primary);
+    }
+
+    #login-screen p {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    /* ヘッダー */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-email {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* フォーム要素 */
+    h2, h3 {
+      margin-bottom: 16px;
+      font-size: 1.25rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    /* ボタン */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s, opacity 0.2s;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-danger {
+      background-color: var(--danger);
+      color: white;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+    }
+
+    .btn-danger:hover {
+      background-color: var(--danger-hover);
+    }
+
+    .btn-secondary {
+      background-color: #e2e8f0;
+      color: var(--text);
+      padding: 6px 12px;
+      font-size: 0.85rem;
+    }
+
+    .btn-secondary:hover {
+      background-color: #cbd5e1;
+    }
+
+    /* エラー & アラート */
+    .error-message {
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      color: var(--danger);
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    /* 計算表示エリア */
+    .total-preview {
+      background-color: #eff6ff;
+      border-left: 4px solid var(--primary);
+      padding: 12px 16px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+    }
+
+    .total-preview .amount {
+      font-size: 1.4rem;
+      color: var(--primary);
+    }
+
+    /* 集計カード */
+    .summary-box {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .summary-card {
+      flex: 1;
+      min-width: 180px;
+      background: #f1f5f9;
+      padding: 12px 16px;
+      border-radius: 8px;
+    }
+
+    .summary-card .label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .summary-card .value {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: var(--text);
+    }
+
+    /* テーブル & 検索 */
+    .filter-bar {
+      margin-bottom: 16px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.95rem;
+    }
+
+    th {
+      background-color: #f8fafc;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background-color: #f1f5f9;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* レスポンシブ対応 (カード形式テーブル) */
+    @media (max-width: 640px) {
+      .table-wrapper table, 
+      .table-wrapper thead, 
+      .table-wrapper tbody, 
+      .table-wrapper th, 
+      .table-wrapper td, 
+      .table-wrapper tr {
+        display: block;
+      }
+
+      .table-wrapper thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+
+      .table-wrapper tr {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 12px;
+        padding: 12px;
+        background-color: var(--card-bg);
+      }
+
+      .table-wrapper td {
+        border: none;
+        position: relative;
+        padding-left: 45%;
+        text-align: right;
+        padding-top: 8px;
+        padding-bottom: 8px;
+      }
+
+      .table-wrapper td::before {
+        position: absolute;
+        left: 8px;
+        width: 40%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        color: var(--text-muted);
+        content: attr(data-label);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- 未ログイン画面 -->
+    <div id="login-screen" class="card">
+      <h1>POSApp レジ管理システム</h1>
+      <p>ご利用を開始するには、Googleアカウントでログインしてください。</p>
+      <button id="login-btn" class="btn btn-primary" style="max-width: 280px; margin: 0 auto;">
+        Googleアカウントでログイン
+      </button>
+    </div>
+
+    <!-- ログイン後画面 -->
+    <div id="app-screen" class="hidden">
+      <header>
+        <h2>レジ販売記録アプリ</h2>
+        <div class="user-info">
+          <span id="user-email" class="user-email"></span>
+          <button id="logout-btn" class="btn btn-secondary">ログアウト</button>
+        </div>
+      </header>
+
+      <!-- 販売登録フォーム -->
+      <div class="card">
+        <h3>新規販売データ登録</h3>
+        <div id="form-error" class="error-message"></div>
+        <form id="pos-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="item-name">商品名 <span style="color:red">*</span></label>
+              <input type="text" id="item-name" placeholder="例: コーヒー" required>
+            </div>
+            <div class="form-group">
+              <label for="unit-price">単価 (円) <span style="color:red">*</span></label>
+              <input type="number" id="unit-price" min="0" placeholder="例: 350" required>
+            </div>
+            <div class="form-group">
+              <label for="quantity">個数 <span style="color:red">*</span></label>
+              <input type="number" id="quantity" min="1" value="1" required>
+            </div>
+            <div class="form-group">
+              <label for="sale-date">日付 <span style="color:red">*</span></label>
+              <input type="date" id="sale-date" required>
+            </div>
+            <div class="form-group full-width">
+              <label for="memo">メモ</label>
+              <textarea id="memo" rows="2" placeholder="サイズ、割引などのメモを入力"></textarea>
+            </div>
+          </div>
+
+          <!-- 合計リアルタイム計算 -->
+          <div class="total-preview">
+            <span>小計金額 (単価 × 個数):</span>
+            <span class="amount">¥<span id="calc-total">0</span></span>
+          </div>
+
+          <button type="submit" class="btn btn-primary">販売データを登録する</button>
+        </form>
+      </div>
+
+      <!-- 集計 & 検索バー -->
+      <div class="card">
+        <h3>売上データ一覧・集計</h3>
+        <div class="summary-box">
+          <div class="summary-card">
+            <div class="label">表示中の売上合計</div>
+            <div class="value">¥<span id="total-sales">0</span></div>
+          </div>
+          <div class="summary-card">
+            <div class="label">表示中の販売件数</div>
+            <div class="value"><span id="total-count">0</span> 件</div>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <input type="text" id="search-filter" placeholder="商品名で検索・絞り込み...">
+        </div>
+
+        <!-- データ一覧表示 -->
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>日付</th>
+                <th>商品名</th>
+                <th>単価</th>
+                <th>個数</th>
+                <th>合計金額</th>
+                <th>メモ</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="history-list">
+              <!-- JSで動的に追加されます -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Firebase SDK Modules (v10) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithPopup, 
+      GoogleAuthProvider, 
+      signOut, 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      query, 
+      where, 
+      onSnapshot, 
+      deleteDoc, 
+      doc, 
+      orderBy 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // -------------------------------------------------------------
+    // Firebase 設定オブジェクト (自身のFirebase設定に変更してください)
+    // -------------------------------------------------------------
+    const firebaseConfig = {
+  apiKey: "AIzaSyBA3R7ux2f4zJi7FtupDzc1A9pEtrjBiBc",
+  authDomain: "tesuto-3ec18.firebaseapp.com",
+  projectId: "tesuto-3ec18",
+  storageBucket: "tesuto-3ec18.firebasestorage.app",
+  messagingSenderId: "245389547527",
+  appId: "1:245389547527:web:dc819a989dd95fc03632a2"
+　};
+
+    // 初期化
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    // グローバル変数
+    let currentUser = null;
+    let unsubscribeSnapshot = null;
+    let rawSalesData = []; // 保持データ
+
+    // 要素の取得
+    const loginScreen = document.getElementById('login-screen');
+    const appScreen = document.getElementById('app-screen');
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userEmailSpan = document.getElementById('user-email');
+
+    const posForm = document.getElementById('pos-form');
+    const itemNameInput = document.getElementById('item-name');
+    const unitPriceInput = document.getElementById('unit-price');
+    const quantityInput = document.getElementById('quantity');
+    const saleDateInput = document.getElementById('sale-date');
+    const memoInput = document.getElementById('memo');
+    const calcTotalSpan = document.getElementById('calc-total');
+    const formError = document.getElementById('form-error');
+
+    const historyList = document.getElementById('history-list');
+    const searchFilter = document.getElementById('search-filter');
+    const totalSalesSpan = document.getElementById('total-sales');
+    const totalCountSpan = document.getElementById('total-count');
+
+    // 初期日付の設定 (本日)
+    saleDateInput.valueAsDate = new Date();
+
+    // -------------------------------------------------------------
+    // 1. Google 認証処理
+    // -------------------------------------------------------------
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        userEmailSpan.textContent = user.email;
+        loginScreen.classList.add('hidden');
+        appScreen.classList.remove('hidden');
+        loadSalesData(user.uid);
+      } else {
+        currentUser = null;
+        if (unsubscribeSnapshot) unsubscribeSnapshot();
+        loginScreen.classList.remove('hidden');
+        appScreen.classList.add('hidden');
+      }
+    });
+
+    loginBtn.addEventListener('click', () => {
+      signInWithPopup(auth, provider).catch((error) => {
+        alert("ログインに失敗しました: " + error.message);
+      });
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      signOut(auth);
+    });
+
+    // -------------------------------------------------------------
+    // 2. 自動計算 (単価 × 個数)
+    // -------------------------------------------------------------
+    function updateCalcTotal() {
+      const price = Number(unitPriceInput.value) || 0;
+      const qty = Number(quantityInput.value) || 0;
+      calcTotalSpan.textContent = (price * qty).toLocaleString();
+    }
+
+    unitPriceInput.addEventListener('input', updateCalcTotal);
+    quantityInput.addEventListener('input', updateCalcTotal);
+
+    // -------------------------------------------------------------
+    // 3. データの登録 (Firestore)
+    // -------------------------------------------------------------
+    posForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      formError.style.display = 'none';
+
+      const itemName = itemNameInput.value.trim();
+      const unitPrice = Number(unitPriceInput.value);
+      const quantity = Number(quantityInput.value);
+      const saleDate = saleDateInput.value;
+      const memo = memoInput.value.trim();
+
+      // エラーチェック・バリデーション
+      if (!itemName || isNaN(unitPrice) || unitPrice < 0 || isNaN(quantity) || quantity <= 0 || !saleDate) {
+        showError('正しくない入力項目があります。確認してください。');
+        return;
+      }
+
+      try {
+        await addDoc(collection(db, "sales"), {
+          uid: currentUser.uid,
+          itemName: itemName,
+          unitPrice: unitPrice,
+          quantity: quantity,
+          totalAmount: unitPrice * quantity,
+          date: saleDate,
+          memo: memo,
+          createdAt: new Date()
+        });
+
+        // フォームリセット
+        posForm.reset();
+        saleDateInput.valueAsDate = new Date();
+        updateCalcTotal();
+      } catch (err) {
+        showError('データの登録中にエラーが発生しました: ' + err.message);
+      }
+    });
+
+    function showError(msg) {
+      formError.textContent = msg;
+      formError.style.display = 'block';
+    }
+
+    // -------------------------------------------------------------
+    // 4. データ読み込み (ユーザー別 & リアルタイム同期)
+    // -------------------------------------------------------------
+    function loadSalesData(uid) {
+      const q = query(
+        collection(db, "sales"),
+        where("uid", "==", uid),
+        orderBy("date", "desc")
+      );
+
+      unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
+        rawSalesData = [];
+        snapshot.forEach((docSnap) => {
+          rawSalesData.push({
+            id: docSnap.id,
+            ...docSnap.data()
+          });
+        });
+        renderTable();
+      });
+    }
+
+    // -------------------------------------------------------------
+    // 5. テーブル描画・絞り込み・集計計算
+    // -------------------------------------------------------------
+    function renderTable() {
+      const filterText = searchFilter.value.trim().toLowerCase();
+      
+      const filteredData = rawSalesData.filter(item => 
+        item.itemName.toLowerCase().includes(filterText)
+      );
+
+      historyList.innerHTML = '';
+      let totalAmountSum = 0;
+
+      filteredData.forEach((item) => {
+        totalAmountSum += item.totalAmount;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td data-label="日付">${item.date}</td>
+          <td data-label="商品名">${escapeHtml(item.itemName)}</td>
+          <td data-label="単価">¥${item.unitPrice.toLocaleString()}</td>
+          <td data-label="個数">${item.quantity}</td>
+          <td data-label="合計金額">¥${item.totalAmount.toLocaleString()}</td>
+          <td data-label="メモ">${escapeHtml(item.memo || '-')}</td>
+          <td data-label="操作">
+            <button class="btn btn-danger delete-btn" data-id="${item.id}">削除</button>
+          </td>
+        `;
+        historyList.appendChild(tr);
+      });
+
+      // 集計表示の更新
+      totalSalesSpan.textContent = totalAmountSum.toLocaleString();
+      totalCountSpan.textContent = filteredData.length;
+
+      // 削除イベントの設定
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const docId = e.target.getAttribute('data-id');
+          if (confirm('この販売記録を削除しますか？')) {
+            try {
+              await deleteDoc(doc(doc(db, "sales", docId)));
+            } catch (err) {
+              alert("削除エラー: " + err.message);
+            }
+          }
+        });
+      });
+    }
+
+    searchFilter.addEventListener('input', renderTable);
+
+    // HTMLエスケープ処理 (XSS防止)
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function(m) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#039;'
+        }[m];
+      });
+    }
+  </script>
+</body>
+</html>
